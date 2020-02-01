@@ -1,0 +1,68 @@
+% Student exercise profile
+:- set_prolog_flag(occurs_check, error).        % disallow cyclic terms
+:- set_prolog_stack(global, limit(8 000 000)).  % limit term space (8Mb)
+:- set_prolog_stack(local,  limit(2 000 000)).  % limit environment space
+:- use_module(library(clpfd)).
+discontiguous
+        edge /4.
+edge(n1, n2, 3, blue).
+edge(n2, n3, 7, red).
+edge(n7, n1, 5, blue).
+edge(n2, n5, 3, red).
+edge(n2, n7, 3, red).
+edge(n5, n1, 3, red).
+edge(n1, n7, 3, red).
+edge(n5, n8, 3, red).
+edge(n3, n5, 3, red).
+edge(n1, n4, 4, blue).
+edge(n6, n3, 3, red).
+edge(n8, n9, 5, red).
+edge(n3, n9, 3, blue).
+edge(n9, n4, 3, blue).
+edge(n4, n8, 2, red).
+edge(n4, n9, 1, red).
+edge(n5, n6, 6, blue).
+edge(n9, n7, 9, blue).
+edge(n5, n7, 9, red).
+
+%Excercise 1-a) %
+connected(X, Y) :- connected(X,Y,[]).
+connected(X, Y, _) :- edge(X,Y,_, _), !.
+connected(X, Y, V) :- 
+    \+ member(X, V), 
+    edge(X,Z,_, _), 
+    connected(Z, Y, [X|V]).
+
+%Excercise 1- b) %
+numberofsteps(X, Y, N) :- numberofsteps(X,Y,N,M,[]).
+numberofsteps(X,Y,1,[X,Y],_) :- edge(X,Y,_,_).
+numberofsteps(X,Y,C1,[X|P],V) :- 
+    \+ member(X,V),
+    edge(X,Z,_,_), 
+    numberofsteps(Z,Y,C,P,[X|V]), 
+    C1 is C+1.
+
+%Excercise 1- c) %
+routedistance(X, Y, R, D) :- routedistance(X, Y, R, D,[]).
+routedistance(X, Y, W, [X,Y], _) :- edge(X, Y, W,_).
+routedistance(X, Y, W, [X|P], V) :- 
+    \+ member(X, V),
+    edge(X, Z, W1,_),
+    routedistance(Z, Y, W2, P, [X|V]),
+    W is W1 + W2.
+
+%Excercise 1-d) %
+sameconnection(A,B,C) :- edge(A,B,_,C).
+sameconnection(A,B,C) :- 
+    \+ member(A,B), 
+    edge(A,D,_,C),
+    sameconnection(D,B,C).
+
+/* %Excercise 1- d) with added D for testing 'path' followed % */
+/* % This version has been used in the tests provided % */
+/*sameconnection(X, Y, R, D) :- sameconnection(X, Y, R, D,[]).
+sameconnection(X, Y, C, [X,Y], _) :- edge(X, Y, _, C).
+sameconnection(X, Y, C, [X|P], V) :-
+    \+ member(X, V),
+    edge(X, Z, _, C),
+    sameconnection(Z, Y, C, P, [X|V]).*/
